@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en" data-site-mode="preview">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="site-config.js"></script>
+<title>Generative Neural Retargeting for Human-to-Robot Dexterous Manipulation</title>
+<meta name="description" content="GNR: a flow-matching model that samples dynamically feasible robot trajectories conditioned on human motion, for scalable and efficient human-to-robot retargeting of dexterous manipulation.">
+<meta property="og:title" content="Generative Neural Retargeting for Human-to-Robot Dexterous Manipulation">
+<meta property="og:description" content="A flow-matching model that samples feasible robot trajectories conditioned on human motion. 56.2% success on out-of-distribution HOT3D vs. 27.2% for MPC with 8.5% of its samples.">
+<meta property="og:image" content="assets/paper/fig1.png">
+<meta property="og:type" content="website">
+<!-- Google Analytics (GA4), same property as the personal site -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L4FWDSZJVD"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-L4FWDSZJVD');</script>
+<link rel="icon" type="image/svg+xml" href="assets/fingertip.svg">
+<link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+:root{
+  --bg:#ffffff; --surface:#f6f7fa; --line:#e5e7ee; --text:#202632; --muted:#6b7280;
+  --indigo:#4c5fd5; --teal:#2ba39a; --amber:#e0a33b;
+  --indigo-soft:#eef0fc; --amber-soft:#fbf3e2;
+  --radius:12px; --shadow:0 1px 2px rgba(32,38,50,.06); --nav-bg:rgba(255,255,255,.82);
+  --fig-bg:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1219; --surface:#161a23; --line:#262c38; --text:#e8eaf0; --muted:#9aa2b1;
+    --indigo:#7f8ee8; --teal:#4cc0b6; --amber:#e8b85a;
+    --indigo-soft:#1c2140; --amber-soft:#332a14;
+    --shadow:none; --nav-bg:rgba(15,18,25,.82); --fig-bg:#f3f4f8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1219; --surface:#161a23; --line:#262c38; --text:#e8eaf0; --muted:#9aa2b1;
+  --indigo:#7f8ee8; --teal:#4cc0b6; --amber:#e8b85a;
+  --indigo-soft:#1c2140; --amber-soft:#332a14;
+  --shadow:none; --nav-bg:rgba(15,18,25,.82); --fig-bg:#f3f4f8;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:56px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,video{display:block;max-width:100%}
+a{color:var(--indigo)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid transparent;transition:border-color .2s}
+.nav.scrolled{border-bottom-color:var(--line)}
+.nav__in{max-width:1120px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;gap:16px}
+.nav__brand{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:-.01em;flex:none}
+.nav__brand::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--indigo)}
+.nav__links{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.nav__links::-webkit-scrollbar{display:none}
+.nav__links a{font-size:.85rem;color:var(--muted);text-decoration:none;padding:6px 11px;border-radius:999px;white-space:nowrap}
+.nav__links a:hover{color:var(--text);background:var(--surface)}
+.nav__links a.on{color:var(--text);background:var(--surface);font-weight:600}
+.nav__links a:focus-visible,.nav__brand:focus-visible,.btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+
+/* header */
+.hero{padding:88px 0 40px;text-align:center}
+.hero h1{font-size:clamp(1.9rem,4.6vw,3.3rem);line-height:1.08;letter-spacing:-.025em;font-weight:700;margin:0 auto 30px;max-width:22ch;text-wrap:balance}
+.authors{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;font-size:1.05rem;line-height:1.5;max-width:60rem;margin:0 auto 14px}
+.author{white-space:nowrap}
+.author__name{color:var(--text);text-decoration:none}
+.author__name[href]:hover{color:var(--indigo);text-decoration:underline}
+.author sup{font-size:.68em;color:var(--muted);margin-left:1px;line-height:0}
+.author sup .sym{font-style:normal;font-size:1.45em;color:var(--text);margin-right:1px}
+.hero .fn .sym{font-style:normal;font-size:1.1em;color:var(--text);margin-right:2px}
+.affils{font-size:.92rem;color:var(--muted);margin:0 auto 6px;max-width:60rem;line-height:1.7}
+.affils span{display:inline-block;white-space:nowrap;margin:0 8px}
+.affils sup{font-size:.72em;margin-right:2px}
+.hero .fn{font-size:.85rem;color:var(--muted);margin:0 0 6px}
+.hero .fn--mail{margin-bottom:28px}
+.hero .fn--mail a{color:var(--muted);text-decoration:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.95em}
+.hero .fn--mail a:hover{color:var(--indigo);text-decoration:underline}
+.btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;font-size:.92rem;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--text);background:var(--bg);transition:background .15s,border-color .15s}
+.btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn--primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn--primary:hover{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.btn:not(.btn--primary):not(.btn--soon):hover{background:var(--surface)}
+.btn--soon{color:var(--muted);background:var(--surface);border-color:transparent;cursor:default}
+.btn--soon small{font-size:.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--bg);padding:1px 6px;border-radius:999px;border:1px solid var(--line)}
+
+/* teaser / paper figures */
+.teaser{margin:0 0 8px}
+.pfig{margin:0}
+.pfig img{width:100%;height:auto;border-radius:8px;background:#fff;padding:10px;box-sizing:border-box}
+:root[data-theme="dark"] .pfig img{filter:brightness(.9)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pfig img{filter:brightness(.9)} }
+.pfig figcaption,.figcap{font-size:.9rem;line-height:1.55;color:var(--muted);margin-top:14px;text-wrap:pretty}
+.pfig figcaption b,.figcap b{color:var(--text);font-weight:600}
+.teaser .pfig img{border-radius:12px;padding:12px}
+
+/* sections */
+.sec{padding:96px 0 0;scroll-margin-top:-40px}
+.sec__head{max-width:760px;margin-bottom:36px}
+.eyebrow{display:block;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo);margin-bottom:10px}
+h2{font-size:clamp(1.55rem,3.2vw,2.15rem);line-height:1.15;letter-spacing:-.015em;margin:0 0 14px;font-weight:700;text-wrap:balance}
+h3.sub{font-size:1.05rem;font-weight:700;margin:52px 0 6px}
+.lead{font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0;max-width:68ch;text-wrap:pretty}
+.note{font-size:.95rem;color:var(--muted);margin:0 0 20px;max-width:72ch;text-wrap:pretty}
+.prose{max-width:76ch;font-size:1.05rem;line-height:1.7}
+#abstract .sec__head{max-width:none;text-align:center;margin-bottom:22px}
+.abs-title{font-size:clamp(1.5rem,2.6vw,1.9rem);margin:0;letter-spacing:-.01em}
+#abstract .prose{margin:0 auto;text-align:left}
+.prose p{margin:0 0 1em}
+.prose p:last-child{margin-bottom:0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:-16px 0 32px;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+
+/* method */
+.idea{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.cost{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+.cost__plot{margin:0}
+.cost__plot figcaption{font-size:.85rem;font-weight:700;margin:0 0 2px 28px}
+.cost__plot svg{width:100%;height:auto;display:block}
+.cost__plot .axis{fill:none;stroke:var(--muted);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.cost__plot .curve{fill:none;stroke:var(--amber);stroke-width:2.6;stroke-linecap:round}
+.cost__plot .clabel{fill:var(--amber);font-size:11px;font-weight:700}
+.cost__plot .alabel{fill:var(--muted);font-size:10px}
+.cost__note{grid-column:1/-1;margin:0 0 0 28px;font-size:.8rem;color:var(--muted)}
+.method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:56px}
+.method h3{margin:0 0 8px;font-size:1rem;font-weight:700}
+.method p{margin:0;font-size:.95rem;line-height:1.6;color:var(--muted)}
+.method p b{color:var(--text);font-weight:600}
+.kstats{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:56px}
+.kstat{padding-top:18px;border-top:1px solid var(--line)}
+.kstat b{display:block;font-size:2.4rem;font-weight:700;letter-spacing:-.03em;color:var(--indigo);line-height:1;margin-bottom:10px;font-variant-numeric:tabular-nums}
+.kstat p{margin:0;font-size:.92rem;line-height:1.5;color:var(--muted);max-width:40ch}
+.engine{margin-top:72px}
+
+/* video cards */
+.grid{display:grid;gap:16px}
+.grid--2{grid-template-columns:1fr 1fr}
+.grid--1{grid-template-columns:1fr}
+.card{padding:14px 14px 12px;border-radius:var(--radius);background:var(--surface)}
+.card__t{margin:0 0 10px;font-weight:600;font-size:.9rem}
+.clips{display:grid;gap:8px}
+.clips--2{grid-template-columns:repeat(2,1fr)}
+.clips--3{grid-template-columns:repeat(3,1fr)}
+.clips--4{grid-template-columns:repeat(4,1fr)}
+.grid--1 .clips{grid-template-columns:repeat(4,minmax(0,1fr))}
+.clip{margin:0}
+.clip video{width:100%;border-radius:8px;background:var(--line)}
+.clip video:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.clip--sq video{aspect-ratio:1/1;object-fit:cover}
+.clip--43 video{aspect-ratio:4/3;object-fit:cover}
+.clip--23 video{aspect-ratio:2/3;object-fit:cover}
+.clip figcaption{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.8rem}
+/* video progress bar */
+.clip__v{position:relative;border-radius:8px;overflow:hidden;line-height:0}
+.clip__v video{border-radius:0}
+.clip__bar{position:absolute;left:0;right:0;bottom:0;height:14px;cursor:pointer;touch-action:none}
+.clip__bar::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.28);transition:height .15s}
+.clip__bar i{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--indigo);transform-origin:left;transform:scaleX(0);transition:height .15s}
+.clip__v:hover .clip__bar::before,.clip__v:hover .clip__bar i,.clip__v.paused .clip__bar::before,.clip__v.paused .clip__bar i{height:5px}
+.clip__v::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(15,18,25,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M8 5.5v13l11-6.5z'/%3E%3C/svg%3E") center/22px no-repeat;opacity:0;transition:opacity .15s;pointer-events:none}
+.clip__v.paused::after{opacity:1}
+.lab{display:inline-flex;align-items:baseline;font-weight:600;color:var(--text)}
+.lab::before{content:"";display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
+.lab--human{--c:var(--teal)}.lab--mpc{--c:var(--amber)}.lab--gnr{--c:var(--indigo)}.lab--ik{--c:var(--muted)}
+.ok{color:var(--text);font-weight:700}
+.no{color:var(--muted)}
+
+/* results */
+.tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px 48px;align-items:start}
+.tbl{margin:0;min-width:0}
+.tbl--wide{grid-column:1/-1;max-width:780px}
+.tbl figcaption{font-size:.9rem;line-height:1.5;color:var(--muted);margin:0 0 12px;text-wrap:pretty}
+.tbl figcaption b{color:var(--text);font-weight:600}
+.tbl .scroll{overflow-x:auto}
+.tbl table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums;border-top:1.5px solid var(--text);border-bottom:1.5px solid var(--text)}
+.tbl th{font-weight:600;font-size:.78rem;color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:bottom}
+.tbl td{text-align:right;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left;padding-left:10px}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tr.grp td{text-align:left;font-size:.76rem;font-weight:600;color:var(--muted);padding:14px 10px 4px;border-bottom:none}
+.tbl tr.ref td{color:var(--muted);font-style:italic}
+.tbl tr.gnr td{background:var(--indigo-soft)}
+.tbl tr.gnr td:first-child{color:var(--indigo);font-weight:600}
+.tbl tr.best td:nth-child(n+4){font-weight:700;color:var(--indigo)}
+.tbl td.g,.tbl th.g{background:var(--indigo-soft)}
+.tbl td.g b{color:var(--indigo)}
+.tbl .sr{color:var(--muted);font-size:.78rem;margin-left:4px}
+.tbl td.g .sr{color:var(--indigo);font-weight:600}
+.tbl td.sv{font-weight:700;color:var(--indigo)}
+.tbl .sr.blk{display:block;margin:0;line-height:1.2}
+.tbl--c th{white-space:normal}
+.tbl--c td{vertical-align:top}
+.tbl td.wrap{white-space:normal;font-size:.8rem;line-height:1.4;text-align:left}
+.tnote{margin:10px 0 0;font-size:.78rem;line-height:1.5;color:var(--muted);text-wrap:pretty}
+.tnote+.tnote{margin-top:4px}
+
+.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;margin-top:72px;align-items:start}
+.figs .pfig img{max-width:min(480px,100%);margin:0 auto}
+.figs .pfig--wide{grid-column:1/-1}
+.figs .pfig--wide img{max-width:none}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.figrow{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px;align-items:center}
+.figrow .pfig img{max-width:min(580px,100%);margin:0}
+.figrow .figcap{margin-top:0;font-size:.95rem;line-height:1.6}
+.pair{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 48px}
+.pair .figcap{grid-column:1/-1;margin-top:0;max-width:90ch}
+.pair .pfig figcaption{text-align:center;font-weight:600;color:var(--text);font-size:.85rem;margin-top:10px}
+.oneline{margin-top:56px;padding:20px 24px;border-radius:var(--radius);background:var(--surface);font-size:.95rem;line-height:1.6;max-width:90ch}
+.oneline b{font-weight:600}
+
+/* footer */
+footer{margin:104px 0 48px;padding-top:40px;border-top:1px solid var(--line);font-size:.9rem;color:var(--muted)}
+footer h2{font-size:1.2rem;margin:0 0 14px;color:var(--text)}
+.bib{position:relative;margin:0 0 28px}
+.bib pre{margin:0;padding:18px 20px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.8rem;line-height:1.55;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+.bib button{position:absolute;top:10px;right:10px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
+.bib button:hover{border-color:var(--indigo);color:var(--indigo)}
+footer p{margin:0 0 6px;max-width:80ch}
+
+@media (max-width:960px){
+  .idea{grid-template-columns:1fr;gap:28px}
+  .method{grid-template-columns:1fr;gap:24px;margin-top:44px}
+  .kstats{gap:24px}
+  .tables{grid-template-columns:minmax(0,1fr)}
+  .grid--2{grid-template-columns:1fr}
+  .figs{grid-template-columns:minmax(0,1fr);gap:40px}
+  .figrow{grid-template-columns:minmax(0,1fr);gap:16px}
+  .figrow .pfig img{max-width:min(580px,100%);margin:0 auto}
+  .pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .nav__brand{display:none}
+  .nav__links{margin-left:0}
+  .hero{padding:52px 0 28px}
+  .hero h1{margin-bottom:22px}
+  .authors{font-size:.98rem;gap:2px 14px}
+  .affils{font-size:.88rem}
+  .affils span{margin:0 6px}
+  .btn{height:38px;padding:0 14px;font-size:.88rem}
+  .sec{padding-top:72px}
+  footer{margin-top:72px}
+  .sec__head{margin-bottom:28px}
+  .clips--4,.grid--1 .clips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kstats{grid-template-columns:1fr;gap:0;margin-top:36px}
+  .kstat{display:grid;grid-template-columns:6.2rem minmax(0,1fr);gap:12px;align-items:baseline;padding:14px 0}
+  .kstat b{font-size:1.75rem;margin:0}
+  .cost__plot .alabel{font-size:13px}
+  .cost__plot .clabel{font-size:12.5px}
+  .tables{gap:44px}
+  .tbl table{font-size:.8rem}
+  .tbl th,.tbl td{padding:6px 5px}
+  .tbl th{white-space:normal}
+  .tbl .sr{display:block;margin:0}
+  .tbl th:first-child,.tbl td:first-child,.tbl tr.grp td{padding-left:6px}
+  .pair{grid-template-columns:minmax(0,1fr);gap:28px}
+  .oneline{padding:16px}
+  .figs .pfig--wide .scroll img{min-width:720px}
+}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+</style>
+<link rel="stylesheet" href="assets/hero/hero.css">
+<script defer src="assets/hero/hero.js"></script>
+</head>
+<body>
+<nav class="nav" aria-label="Sections"><div class="nav__in">
+  <a class="nav__brand" href="#top"><img src="assets/fingertip.svg" width="26" height="26" alt="">GNR</a>
+  <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="section-links">Explore <span aria-hidden="true">☰</span></button>
+  <div class="nav__links" id="section-links">
+    <a href="#abstract">Abstract</a><a href="#method">Method</a><a href="#hot3d">Large-Scale Retargeting</a><a href="#precision">Long-horizon and High-Precision Retargeting</a><a href="#results">Results</a><a href="#bibtex">BibTeX</a>
+  </div>
+</div></nav>
+  <header class="hero" id="top">
+    <div class="hero__media" aria-hidden="true">
+      <picture>
+        <source media="(max-width: 760px)" srcset="assets/hero/poster-mobile.webp">
+        <img src="assets/hero/poster.webp" width="1280" height="720" alt="" fetchpriority="high">
+      </picture>
+    </div>
+    <div class="hero__content">
+    <span class="hero__eyebrow">Scalable Human-to-Robot Retargeting</span>
+    <h1 aria-label="Generative Neural Retargeting"><span class="title-word"><b class="initial initial--g">G</b>enerative</span> <span class="title-word"><b class="initial initial--n">N</b>eural</span> <span class="title-word"><b class="initial initial--r">R</b>etargeting</span></h1>
+    <p class="hero__description">for Human-to-Robot Dexterous Manipulation</p>
+    <div class="authors">
+      <span class="author"><a class="author__name" href="https://gaodechen.github.io/" target="_blank" rel="noopener noreferrer">Dechen Gao</a><sup><i class="sym">*&dagger;</i>1,2</sup></span>
+      <span class="author"><a class="author__name" href="https://yy-gx.github.io/" target="_blank" rel="noopener noreferrer">Yue Yang</a><sup><i class="sym">*&dagger;</i>1,3</sup></span>
+      <span class="author"><a class="author__name" href="https://babbatem.github.io/" target="_blank" rel="noopener noreferrer">Ben Abbatematteo</a><sup>1</sup></span>
+      <span class="author"><a class="author__name" href="https://github.com/nathanrgodwin" target="_blank" rel="noopener noreferrer">Nathan Godwin</a><sup>1</sup></span>
+      <span class="author"><a class="author__name" href="https://outsider86.github.io/" target="_blank" rel="noopener noreferrer">Pengcheng Wang</a><sup><i class="sym">&dagger;</i>1,4</sup></span>
+      <span class="author"><a class="author__name" href="https://ahlab.org/people/roger-boldu/" target="_blank" rel="noopener noreferrer">Roger Boldu</a><sup>1</sup></span>
+      <span class="author"><a class="author__name" href="https://stevenwman.github.io/" target="_blank" rel="noopener noreferrer">Steven Man</a><sup><i class="sym">&dagger;</i>1,6</sup></span>
+      <span class="author"><a class="author__name" href="https://people.csail.mit.edu/frankzydou/" target="_blank" rel="noopener noreferrer">Zhiyang Dou</a><sup><i class="sym">&dagger;</i>1,5</sup></span>
+      <span class="author"><a class="author__name" href="https://www.linkedin.com/in/chuanqin/" target="_blank" rel="noopener noreferrer">Chuan Qin</a><sup>1</sup></span>
+      <span class="author"><a class="author__name" href="https://www.linkedin.com/in/shonakagome/" target="_blank" rel="noopener noreferrer">Sho Nakagome</a><sup>1</sup></span>
+      <span class="author"><a class="author__name" href="https://www.ericwhitmire.com/" target="_blank" rel="noopener noreferrer">Eric Whitmire</a><sup>1</sup></span>
+    </div>
+    <p class="fn"><span class="sym">*</span>Equal contribution. &nbsp;<span class="sym">&dagger;</span>Work done at Meta.</p>
+    <p class="fn fn--mail">Correspondence: <a href="mailto:dcgao@ucdavis.edu">dcgao@ucdavis.edu</a>, <a href="mailto:yygx@cs.unc.edu">yygx@cs.unc.edu</a></p>
+    <div class="btns">
+      <!-- TODO: link --><a class="btn btn--primary" data-link="arxiv" href="#"><svg viewBox="0 0 24 24"><path d="M14 3h7v7M21 3l-9 9M18 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg>arXiv</a>
+      <!-- TODO: link --><a class="btn btn--primary" data-link="pdf" href="#"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>PDF</a>
+      <!-- Coming soon: restore this button when the resource is released.
+      <span class="btn btn--soon" data-link="code" aria-disabled="true"><svg viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>Code <small>soon</small></span>
+      -->
+      <!-- Coming soon: restore this button when the resource is released.
+      <span class="btn btn--soon" data-link="dataset" aria-disabled="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg>Dataset <small>soon</small></span>
+      -->
+    </div>
+    <p class="hero__coming-soon"><span>Stay tuned.</span> More details are coming soon.</p>
+    </div>
+    <ul class="affils" aria-label="Author affiliations">
+      <li class="affil affil--meta"><sup>1</sup><a href="https://www.meta.com/emerging-tech/" aria-label="Affiliation 1: Meta Reality Labs Research"><img src="assets/logos/meta.svg" width="100" height="25" alt="Meta"><span class="affil__label">Reality Labs Research</span></a></li>
+      <li class="affil affil--davis"><sup>2</sup><a href="https://www.ucdavis.edu/" aria-label="Affiliation 2: UC Davis"><img src="assets/logos/uc-davis.svg" width="150" height="37" alt="UC Davis"></a></li>
+      <li class="affil affil--unc"><sup>3</sup><a href="https://www.unc.edu/" aria-label="Affiliation 3: UNC Chapel Hill"><img src="assets/logos/unc.svg" width="150" height="37" alt="The University of North Carolina at Chapel Hill"></a></li>
+      <li class="affil affil--berkeley"><sup>4</sup><a href="https://www.berkeley.edu/" aria-label="Affiliation 4: UC Berkeley"><img src="assets/logos/berkeley.svg" width="150" height="37" alt="UC Berkeley"></a></li>
+      <li class="affil affil--mit"><sup>5</sup><a href="https://www.mit.edu/" aria-label="Affiliation 5: MIT"><img src="assets/logos/mit.svg" width="150" height="37" alt="Massachusetts Institute of Technology"></a></li>
+      <li class="affil affil--cmu"><sup>6</sup><a href="https://www.cmu.edu/" aria-label="Affiliation 6: Carnegie Mellon University"><img src="assets/logos/cmu.svg" width="100" height="48" alt="Carnegie Mellon University"></a></li>
+    </ul>
+    <div class="hero__bottom">
+      <a class="hero__explore" href="#overview">EXPLORE THE RESEARCH <span aria-hidden="true">↓</span></a>
+    </div>
+  </header>
+<template id="full-site-content">
+</template>
+<script>
+// In preview mode the template stays inert: no demo players, images, or galleries load.
+if (window.GNR_SITE && window.GNR_SITE.fullSite) {
+  var research = document.getElementById('full-site-content');
+  research.replaceWith(research.content.cloneNode(true));
+}
+</script>
+<script>
+(function(){
+  var vids=document.querySelectorAll('.clip video[loop]');
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){vids.forEach(function(v){v.controls=true;v.preload='metadata';});return;}
+  function toggle(v){ v.paused?v.play().catch(function(){}):v.pause(); }
+  vids.forEach(function(v){
+    var w=document.createElement('div'); w.className='clip__v paused';
+    v.parentNode.insertBefore(w,v); w.appendChild(v);
+    var bar=document.createElement('div'); bar.className='clip__bar'; bar.setAttribute('aria-hidden','true');
+    var fill=document.createElement('i'); bar.appendChild(fill); w.appendChild(bar);
+    var raf=null;
+    function draw(){ if(v.duration){fill.style.transform='scaleX('+(v.currentTime/v.duration)+')';} if(!v.paused){raf=requestAnimationFrame(draw);} }
+    v.addEventListener('play',function(){w.classList.remove('paused'); cancelAnimationFrame(raf); draw();});
+    v.addEventListener('pause',function(){w.classList.add('paused'); cancelAnimationFrame(raf); draw();});
+    v.addEventListener('seeked',draw);
+    function seek(e){ var r=bar.getBoundingClientRect(); var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; if(v.duration){v.currentTime=Math.max(0,Math.min(1,x/r.width))*v.duration;} draw(); }
+    var drag=false;
+    bar.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();drag=true;bar.setPointerCapture(e.pointerId);seek(e);});
+    bar.addEventListener('pointermove',function(e){ if(drag){seek(e);} });
+    bar.addEventListener('pointerup',function(e){drag=false;});
+    bar.addEventListener('click',function(e){e.stopPropagation();});
+  });
+  vids.forEach(function(v){
+    v.addEventListener('click',function(){toggle(v);});
+    v.addEventListener('keydown',function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle(v);} });
+  });
+  if(!('IntersectionObserver' in window)){vids.forEach(function(v){v.preload='auto';v.play().catch(function(){});});return;}
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      var v=e.target;
+      if(e.isIntersecting){ if(v.preload!=='auto'){v.preload='auto';} v.play().catch(function(){}); }
+      else { v.pause(); }
+    });
+  },{rootMargin:'160px 0px',threshold:0.1});
+  vids.forEach(function(v){io.observe(v);});
+})();
+(function(){
+  if (!window.GNR_SITE || !window.GNR_SITE.fullSite) return;
+  var nav=document.querySelector('.nav');
+  function onScroll(){ nav.classList.toggle('scrolled', window.scrollY>8); }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  if(!('IntersectionObserver' in window)) return;
+  var links={}; document.querySelectorAll('.nav__links a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+  // Both precision benchmarks share one capability-based navigation item.
+  links.shapefilter=links.precision; links.nist=links.precision;
+  var box=document.querySelector('.nav__links');
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(!e.isIntersecting) return;
+      Object.keys(links).forEach(function(k){links[k].classList.toggle('on',links[k]===links[e.target.id]);});
+      var a=links[e.target.id];
+      if(a&&box.scrollWidth>box.clientWidth){ box.scrollLeft=a.offsetLeft-box.offsetLeft-(box.clientWidth-a.offsetWidth)/2; }
+    });
+  },{rootMargin:'-40% 0px -55% 0px'});
+  ['top'].concat(Object.keys(links)).forEach(function(k){var el=document.getElementById(k); if(el) io.observe(el);});
+})();
+(function(){
+  var b=document.getElementById('copybib'), t=document.getElementById('bibtext');
+  if(!b||!t||!navigator.clipboard){ if(b) b.style.display='none'; return; }
+  b.addEventListener('click',function(){
+    navigator.clipboard.writeText(t.textContent).then(function(){ b.textContent='Copied'; setTimeout(function(){b.textContent='Copy';},1600); });
+  });
+})();
+</script>
+</body>
+</html>
