@@ -1,4 +1,4 @@
-"""Export four static WebP slides per hero tile from local research demos.
+"""Export selected static WebP keyframes per hero tile from local research demos.
 
 Usage: python3 scripts/build_hero_stills.py /path/to/paper-workspace
 Requires FFmpeg. Only still images are written to the public site.
@@ -12,12 +12,17 @@ from pathlib import Path
 SOURCES = {
     'dino-human': ('demos/appendix/hot3d/replacements_v1/dino_carry/egocentric.mp4', [0.6, 1.8, 3.2, 4.8], None),
     'dino-robot': ('demos/appendix/hot3d/replacements_v1/dino_carry/gnr.mp4', [1.6, 2.8, 4.2, 5.8], None),
-    'nist': ('demos/latest/nist/episode_25/gnr_mpc.mp4', [8, 12, 17, 22], 'crop=960:720:0:720'),
+    'nist': ('demos/latest/nist/episode_25/gnr_mpc.mp4', [4, 6, 10, 12, 14, 23], 'crop=960:720:0:720'),
     'coffee-human': ('demos/appendix/hot3d/pi31_final_v1/coffee_pot_lift/egocentric.mp4', [0.6, 1.8, 3.2, 4.8], None),
     'coffee-robot': ('demos/appendix/hot3d/pi31_final_v1/coffee_pot_lift/gnr_coffee_occ.mp4', [0.3, 1, 1.8, 2.8], None),
-    'shapefilter': ('demos/latest/shapefilter/episode_124/gnr_mpc.mp4', [4, 6, 8, 10], None),
+    'shapefilter': ('demos/latest/shapefilter/episode_124/gnr_mpc.mp4', [5, 7, 8, 9, 10, 11], None),
 }
 
+
+STAGES = {
+    'nist': ['grasp', 'lift and transport', 'seat', 'rotate', 'rotate', 'release'],
+    'shapefilter': ['grasp', 'lift', 'align', 'begin insertion', 'insert', 'release'],
+}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -36,6 +41,8 @@ def main():
             subprocess.run(command + ['-c:v', 'libwebp', '-quality', '85', '-compression_level', '6', '-map_metadata', '-1', str(target)], check=True)
             files.append(target.name)
         manifest[name] = {'source': source, 'seconds': times, 'crop': crop, 'files': files}
+        if name in STAGES:
+            manifest[name]['stages'] = STAGES[name]
     (out / 'sources.json').write_text(json.dumps(manifest, indent=2) + '\n')
     images = list(out.glob('*.webp'))
     print(f'{len(images)} stills, {sum(p.stat().st_size for p in images) / 1024:.0f} KiB total')

@@ -34,17 +34,29 @@
   "nist": {
     "source": "demos/latest/nist/episode_25/gnr_mpc.mp4",
     "seconds": [
-      8,
+      4,
+      6,
+      10,
       12,
-      17,
-      22
+      14,
+      23
     ],
     "crop": "crop=960:720:0:720",
     "files": [
       "nist-1.webp",
       "nist-2.webp",
       "nist-3.webp",
-      "nist-4.webp"
+      "nist-4.webp",
+      "nist-5.webp",
+      "nist-6.webp"
+    ],
+    "stages": [
+      "grasp",
+      "lift and transport",
+      "seat",
+      "rotate",
+      "rotate",
+      "release"
     ]
   },
   "coffee-human": {
@@ -82,17 +94,29 @@
   "shapefilter": {
     "source": "demos/latest/shapefilter/episode_124/gnr_mpc.mp4",
     "seconds": [
-      4,
-      6,
+      5,
+      7,
       8,
-      10
+      9,
+      10,
+      11
     ],
     "crop": null,
     "files": [
       "shapefilter-1.webp",
       "shapefilter-2.webp",
       "shapefilter-3.webp",
-      "shapefilter-4.webp"
+      "shapefilter-4.webp",
+      "shapefilter-5.webp",
+      "shapefilter-6.webp"
+    ],
+    "stages": [
+      "grasp",
+      "lift",
+      "align",
+      "begin insertion",
+      "insert",
+      "release"
     ]
   }
 }

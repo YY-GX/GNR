@@ -1,44 +1,36 @@
-/* Static images advance together every second, including during hover.
-   Decode the next frame in advance so network latency does not set the cadence. */
+/* Predecode real still-image keyframes, then swap the visible image every second.
+   One image per tile avoids layered-image and stale-style rendering problems. */
 (function () {
   'use strict';
   var hero = document.querySelector('.hero');
+  var media = document.querySelector('.hero__media');
   var tiles = Array.from(document.querySelectorAll('.hero__tile'));
   var details = Array.from(document.querySelectorAll('.hero__media button'));
-  if (!hero || !tiles.length) return;
-  var visible = true, loading = false;
-  function prepare(state) {
-    var next = state.images[1 - state.front];
-    next.src = 'assets/hero/stills/' + state.tile.dataset.slides + '-' + ((state.frame + 1) % 4 + 1) + '.webp';
-    return next.decode().then(function () { return true; }, function () { return false; });
-  }
+  if (!hero || !media || !tiles.length) return;
+  var visible = true;
   var states = tiles.map(function (tile) {
-    var first = tile.querySelector('img');
-    var second = document.createElement('img');
-    second.className = 'hero__slide'; second.alt = ''; second.setAttribute('aria-hidden', 'true'); second.decoding = 'async';
-    second.width = first.width; second.height = first.height;
-    tile.insertBefore(second, first.nextSibling);
+    var image = tile.querySelector('img');
+    var count = Number(tile.dataset.frameCount) || 4;
+    var frames = Array.from({length: count}, function (_, i) {
+      var preloaded = new Image();
+      var frame = {image: preloaded, ready: false};
+      preloaded.src = 'assets/hero/stills/' + tile.dataset.slides + '-' + (i + 1) + '.webp?v=' + media.dataset.version;
+      // Each tile loads independently; one slow image cannot freeze the whole grid.
+      preloaded.decode().then(function () { frame.ready = true; }, function () {});
+      return frame;
+    });
     tile.dataset.frame = '1';
-    var state = {tile: tile, images: [first, second], front: 0, frame: 0};
-    state.ready = prepare(state);
-    return state;
+    return {tile: tile, image: image, frames: frames, frame: 0};
   });
-  function canPlay() { return visible && !document.hidden; }
-  async function advance() {
-    if (!canPlay() || loading) return;
-    loading = true;
-    await Promise.all(states.map(async function (state) {
-      if (!await state.ready) { state.ready = prepare(state); return; }
-      if (!canPlay()) return;
-      var current = state.images[state.front], next = state.images[1 - state.front];
-      current.classList.remove('is-current'); next.classList.add('is-current');
-      next.alt = current.alt; next.removeAttribute('aria-hidden'); current.setAttribute('aria-hidden', 'true');
-      state.front = 1 - state.front; state.frame = (state.frame + 1) % 4;
-      state.tile.dataset.frame = String(state.frame + 1);
-      // Let the short crossfade finish before replacing the hidden image.
-      state.ready = new Promise(function (resolve) { setTimeout(resolve, 250); }).then(function () { return prepare(state); });
-    }));
-    loading = false;
+  function advance() {
+    if (!visible || document.hidden) return;
+    states.forEach(function (state) {
+      var next = (state.frame + 1) % state.frames.length;
+      if (!state.frames[next].ready) return;
+      state.image.src = state.frames[next].image.src;
+      state.frame = next;
+      state.tile.dataset.frame = String(next + 1);
+    });
   }
   function closeDetails() { details.forEach(function (el) { el.classList.remove('is-open'); el.setAttribute('aria-pressed', 'false'); }); }
   details.forEach(function (el) {
