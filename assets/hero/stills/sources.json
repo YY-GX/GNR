@@ -1,0 +1,98 @@
+{
+  "dino-human": {
+    "source": "demos/appendix/hot3d/replacements_v1/dino_carry/egocentric.mp4",
+    "seconds": [
+      0.6,
+      1.8,
+      3.2,
+      4.8
+    ],
+    "crop": null,
+    "files": [
+      "dino-human-1.webp",
+      "dino-human-2.webp",
+      "dino-human-3.webp",
+      "dino-human-4.webp"
+    ]
+  },
+  "dino-robot": {
+    "source": "demos/appendix/hot3d/replacements_v1/dino_carry/gnr.mp4",
+    "seconds": [
+      1.6,
+      2.8,
+      4.2,
+      5.8
+    ],
+    "crop": null,
+    "files": [
+      "dino-robot-1.webp",
+      "dino-robot-2.webp",
+      "dino-robot-3.webp",
+      "dino-robot-4.webp"
+    ]
+  },
+  "nist": {
+    "source": "demos/latest/nist/episode_25/gnr_mpc.mp4",
+    "seconds": [
+      8,
+      12,
+      17,
+      22
+    ],
+    "crop": "crop=960:720:0:720",
+    "files": [
+      "nist-1.webp",
+      "nist-2.webp",
+      "nist-3.webp",
+      "nist-4.webp"
+    ]
+  },
+  "coffee-human": {
+    "source": "demos/appendix/hot3d/pi31_final_v1/coffee_pot_lift/egocentric.mp4",
+    "seconds": [
+      0.6,
+      1.8,
+      3.2,
+      4.8
+    ],
+    "crop": null,
+    "files": [
+      "coffee-human-1.webp",
+      "coffee-human-2.webp",
+      "coffee-human-3.webp",
+      "coffee-human-4.webp"
+    ]
+  },
+  "coffee-robot": {
+    "source": "demos/appendix/hot3d/pi31_final_v1/coffee_pot_lift/gnr_coffee_occ.mp4",
+    "seconds": [
+      0.3,
+      1,
+      1.8,
+      2.8
+    ],
+    "crop": null,
+    "files": [
+      "coffee-robot-1.webp",
+      "coffee-robot-2.webp",
+      "coffee-robot-3.webp",
+      "coffee-robot-4.webp"
+    ]
+  },
+  "shapefilter": {
+    "source": "demos/latest/shapefilter/episode_124/gnr_mpc.mp4",
+    "seconds": [
+      4,
+      6,
+      8,
+      10
+    ],
+    "crop": null,
+    "files": [
+      "shapefilter-1.webp",
+      "shapefilter-2.webp",
+      "shapefilter-3.webp",
+      "shapefilter-4.webp"
+    ]
+  }
+}

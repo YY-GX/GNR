@@ -1,67 +1,74 @@
-/* Start with the still image. Load video only after an explicit Play request. */
+/* Image-only slideshows: no video elements, video URLs, or animation formats.
+   One next still per tile is fetched only when a visible slideshow advances. */
 (function () {
+  'use strict';
   var hero = document.querySelector('.hero');
-  var video = document.getElementById('hero-video');
-  var button = document.getElementById('hero-toggle');
-  if (!hero || !video || !button) return;
-  var motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var tiles = Array.from(document.querySelectorAll('.hero__tile'));
+  var toggle = document.querySelector('.hero__slideshow-toggle');
+  if (!hero || !tiles.length || !toggle) return;
+  var motion = matchMedia('(prefers-reduced-motion: reduce)');
   var connection = navigator.connection;
-  var requested = false;
-  var visible = true;
-  var ready = false;
-  var pausedByUser = true;
-  var optedIn = false;
-  function saveData() {
-    return connection && (connection.saveData || /(^|-)2g$/.test(connection.effectiveType));
-  }
-  function allowed() { return optedIn || (!motion.matches && !saveData()); }
-  function label() {
-    button.dataset.state = video.paused ? 'paused' : 'playing';
-    var action = video.paused ? 'Play background video' : 'Pause background video';
-    button.setAttribute('aria-label', action);
-    button.setAttribute('title', action);
-  }
-  function sync() {
-    if (!ready || !visible || document.hidden || pausedByUser || !allowed()) {
-      video.pause();
-      return;
-    }
-    if (!requested) {
-      video.src = window.matchMedia('(max-width: 760px)').matches
-        ? 'assets/hero/montage-mobile.mp4' : 'assets/hero/montage.mp4';
-      requested = true;
-    }
-    video.play().catch(function () { label(); });
-  }
-  video.addEventListener('playing', function () { video.classList.add('is-playing'); label(); });
-  video.addEventListener('pause', label);
-  video.addEventListener('error', function () {
-    video.classList.remove('is-playing');
-    button.hidden = true;
+  var restricted = function () { return motion.matches || (connection && (connection.saveData || /(^|-)2g$/.test(connection.effectiveType))); };
+  var paused = !!restricted(), visible = true, timer = null, loading = false;
+  var states = tiles.map(function (tile) {
+    var first = tile.querySelector('img');
+    var second = document.createElement('img');
+    second.className = 'hero__slide'; second.alt = ''; second.setAttribute('aria-hidden', 'true'); second.decoding = 'async';
+    second.width = first.width; second.height = first.height;
+    tile.insertBefore(second, first.nextSibling);
+    return {tile: tile, images: [first, second], front: 0, frame: 0};
   });
-  button.addEventListener('click', function () {
-    if (!video.paused) { pausedByUser = true; video.pause(); }
-    else { pausedByUser = false; optedIn = true; ready = true; sync(); }
-    label();
+  function canPlay() { return !paused && visible && !document.hidden; }
+  function label() { toggle.textContent = paused ? 'Play slides' : 'Pause slides'; toggle.setAttribute('aria-pressed', String(paused)); }
+  function schedule() {
+    clearTimeout(timer);
+    if (canPlay() && !loading) timer = setTimeout(advance, 4200);
+  }
+  async function advance() {
+    if (!canPlay()) return;
+    loading = true;
+    await Promise.all(states.map(async function (state) {
+      // Hold a frame still while its task details are being inspected.
+      if (state.tile.matches(':hover,:focus-within') || state.tile.classList.contains('is-open')) return;
+      var nextFrame = (state.frame + 1) % 4;
+      var next = state.images[1 - state.front];
+      next.src = 'assets/hero/stills/' + state.tile.dataset.slides + '-' + (nextFrame + 1) + '.webp';
+      try { await next.decode(); } catch (_) { return; }
+      if (!canPlay() || state.tile.matches(':hover,:focus-within') || state.tile.classList.contains('is-open')) return;
+      state.images[state.front].classList.remove('is-current');
+      next.classList.add('is-current');
+      // Keep the original alt text available on the selected frame only.
+      next.alt = state.images[state.front].alt;
+      next.removeAttribute('aria-hidden');
+      state.images[state.front].setAttribute('aria-hidden', 'true');
+      state.front = 1 - state.front; state.frame = nextFrame;
+      state.tile.dataset.frame = String(nextFrame + 1);
+      state.tile.querySelectorAll('.hero__steps i').forEach(function (step, i) { step.classList.toggle('is-current', i === nextFrame); });
+    }));
+    loading = false;
+    schedule();
+  }
+  function closeDetails() { tiles.forEach(function (tile) { tile.classList.remove('is-open'); tile.setAttribute('aria-pressed', 'false'); }); }
+  tiles.forEach(function (tile) {
+    tile.addEventListener('click', function () {
+      var wasOpen = tile.classList.contains('is-open'); closeDetails();
+      if (!wasOpen) { tile.classList.add('is-open'); tile.setAttribute('aria-pressed', 'true'); }
+    });
+    tile.addEventListener('pointerleave', function (e) {
+      if (e.pointerType === 'mouse') { tile.classList.remove('is-open'); tile.setAttribute('aria-pressed', 'false'); }
+    });
+    tile.addEventListener('blur', function () { tile.classList.remove('is-open'); tile.setAttribute('aria-pressed', 'false'); });
   });
-  button.hidden = false;
-  label();
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (entries) {
-      visible = entries[0].isIntersecting;
-      sync();
-    }, { threshold: 0 }).observe(hero);
-  }
-  document.addEventListener('visibilitychange', sync);
-  motion.addEventListener('change', function () { optedIn = false; sync(); });
-  if (connection && connection.addEventListener) connection.addEventListener('change', sync);
-  function start() {
-    var run = function () { ready = true; sync(); };
-    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1500 });
-    else window.setTimeout(run, 250);
-  }
-  if (document.readyState === 'complete') start();
-  else window.addEventListener('load', start, { once: true });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeDetails(); if (document.activeElement && document.activeElement.classList.contains('hero__tile')) document.activeElement.blur(); } });
+  document.addEventListener('pointerdown', function (e) { if (!e.target.closest('.hero__tile')) closeDetails(); });
+  toggle.addEventListener('click', function () { paused = !paused; label(); schedule(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; schedule(); }, { threshold: 0 }).observe(hero);
+  document.addEventListener('visibilitychange', schedule);
+  motion.addEventListener('change', function () { if (restricted()) paused = true; label(); schedule(); });
+  if (connection && connection.addEventListener) connection.addEventListener('change', function () { if (restricted()) paused = true; label(); schedule(); });
+  toggle.hidden = false; label();
+  if (document.readyState === 'complete') schedule();
+  else addEventListener('load', schedule, { once: true });
 })();
 
 // A compact mobile menu keeps the full capability names readable.
