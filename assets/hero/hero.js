@@ -1,74 +1,60 @@
-/* Image-only slideshows: no video elements, video URLs, or animation formats.
-   One next still per tile is fetched only when a visible slideshow advances. */
+/* Static images advance together every second, including during hover.
+   Decode the next frame in advance so network latency does not set the cadence. */
 (function () {
   'use strict';
   var hero = document.querySelector('.hero');
   var tiles = Array.from(document.querySelectorAll('.hero__tile'));
-  var toggle = document.querySelector('.hero__slideshow-toggle');
-  if (!hero || !tiles.length || !toggle) return;
-  var motion = matchMedia('(prefers-reduced-motion: reduce)');
-  var connection = navigator.connection;
-  var restricted = function () { return motion.matches || (connection && (connection.saveData || /(^|-)2g$/.test(connection.effectiveType))); };
-  var paused = !!restricted(), visible = true, timer = null, loading = false;
+  var details = Array.from(document.querySelectorAll('.hero__media button'));
+  if (!hero || !tiles.length) return;
+  var visible = true, loading = false;
+  function prepare(state) {
+    var next = state.images[1 - state.front];
+    next.src = 'assets/hero/stills/' + state.tile.dataset.slides + '-' + ((state.frame + 1) % 4 + 1) + '.webp';
+    return next.decode().then(function () { return true; }, function () { return false; });
+  }
   var states = tiles.map(function (tile) {
     var first = tile.querySelector('img');
     var second = document.createElement('img');
     second.className = 'hero__slide'; second.alt = ''; second.setAttribute('aria-hidden', 'true'); second.decoding = 'async';
     second.width = first.width; second.height = first.height;
     tile.insertBefore(second, first.nextSibling);
-    return {tile: tile, images: [first, second], front: 0, frame: 0};
+    tile.dataset.frame = '1';
+    var state = {tile: tile, images: [first, second], front: 0, frame: 0};
+    state.ready = prepare(state);
+    return state;
   });
-  function canPlay() { return !paused && visible && !document.hidden; }
-  function label() { toggle.textContent = paused ? 'Play slides' : 'Pause slides'; toggle.setAttribute('aria-pressed', String(paused)); }
-  function schedule() {
-    clearTimeout(timer);
-    if (canPlay() && !loading) timer = setTimeout(advance, 4200);
-  }
+  function canPlay() { return visible && !document.hidden; }
   async function advance() {
-    if (!canPlay()) return;
+    if (!canPlay() || loading) return;
     loading = true;
     await Promise.all(states.map(async function (state) {
-      // Hold a frame still while its task details are being inspected.
-      if (state.tile.matches(':hover,:focus-within') || state.tile.classList.contains('is-open')) return;
-      var nextFrame = (state.frame + 1) % 4;
-      var next = state.images[1 - state.front];
-      next.src = 'assets/hero/stills/' + state.tile.dataset.slides + '-' + (nextFrame + 1) + '.webp';
-      try { await next.decode(); } catch (_) { return; }
-      if (!canPlay() || state.tile.matches(':hover,:focus-within') || state.tile.classList.contains('is-open')) return;
-      state.images[state.front].classList.remove('is-current');
-      next.classList.add('is-current');
-      // Keep the original alt text available on the selected frame only.
-      next.alt = state.images[state.front].alt;
-      next.removeAttribute('aria-hidden');
-      state.images[state.front].setAttribute('aria-hidden', 'true');
-      state.front = 1 - state.front; state.frame = nextFrame;
-      state.tile.dataset.frame = String(nextFrame + 1);
-      state.tile.querySelectorAll('.hero__steps i').forEach(function (step, i) { step.classList.toggle('is-current', i === nextFrame); });
+      if (!await state.ready) { state.ready = prepare(state); return; }
+      if (!canPlay()) return;
+      var current = state.images[state.front], next = state.images[1 - state.front];
+      current.classList.remove('is-current'); next.classList.add('is-current');
+      next.alt = current.alt; next.removeAttribute('aria-hidden'); current.setAttribute('aria-hidden', 'true');
+      state.front = 1 - state.front; state.frame = (state.frame + 1) % 4;
+      state.tile.dataset.frame = String(state.frame + 1);
+      // Let the short crossfade finish before replacing the hidden image.
+      state.ready = new Promise(function (resolve) { setTimeout(resolve, 250); }).then(function () { return prepare(state); });
     }));
     loading = false;
-    schedule();
   }
-  function closeDetails() { tiles.forEach(function (tile) { tile.classList.remove('is-open'); tile.setAttribute('aria-pressed', 'false'); }); }
-  tiles.forEach(function (tile) {
-    tile.addEventListener('click', function () {
-      var wasOpen = tile.classList.contains('is-open'); closeDetails();
-      if (!wasOpen) { tile.classList.add('is-open'); tile.setAttribute('aria-pressed', 'true'); }
+  function closeDetails() { details.forEach(function (el) { el.classList.remove('is-open'); el.setAttribute('aria-pressed', 'false'); }); }
+  details.forEach(function (el) {
+    el.addEventListener('click', function () {
+      var wasOpen = el.classList.contains('is-open'); closeDetails();
+      if (!wasOpen) { el.classList.add('is-open'); el.setAttribute('aria-pressed', 'true'); }
     });
-    tile.addEventListener('pointerleave', function (e) {
-      if (e.pointerType === 'mouse') { tile.classList.remove('is-open'); tile.setAttribute('aria-pressed', 'false'); }
+    el.addEventListener('pointerleave', function (e) {
+      if (e.pointerType === 'mouse') { el.classList.remove('is-open'); el.setAttribute('aria-pressed', 'false'); }
     });
-    tile.addEventListener('blur', function () { tile.classList.remove('is-open'); tile.setAttribute('aria-pressed', 'false'); });
+    el.addEventListener('blur', function () { el.classList.remove('is-open'); el.setAttribute('aria-pressed', 'false'); });
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeDetails(); if (document.activeElement && document.activeElement.classList.contains('hero__tile')) document.activeElement.blur(); } });
-  document.addEventListener('pointerdown', function (e) { if (!e.target.closest('.hero__tile')) closeDetails(); });
-  toggle.addEventListener('click', function () { paused = !paused; label(); schedule(); });
-  if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; schedule(); }, { threshold: 0 }).observe(hero);
-  document.addEventListener('visibilitychange', schedule);
-  motion.addEventListener('change', function () { if (restricted()) paused = true; label(); schedule(); });
-  if (connection && connection.addEventListener) connection.addEventListener('change', function () { if (restricted()) paused = true; label(); schedule(); });
-  toggle.hidden = false; label();
-  if (document.readyState === 'complete') schedule();
-  else addEventListener('load', schedule, { once: true });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeDetails(); if (details.includes(document.activeElement)) document.activeElement.blur(); } });
+  document.addEventListener('pointerdown', function (e) { if (!e.target.closest('.hero__media button')) closeDetails(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }, { threshold: 0 }).observe(hero);
+  setInterval(advance, 1000);
 })();
 
 // A compact mobile menu keeps the full capability names readable.
