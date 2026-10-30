@@ -1,0 +1,50 @@
+{
+  "fig1": {
+    "source": "figures/fig1_gnr_v3.pdf",
+    "source_sha256": "6ededabf798e5f0bfb58b07015a1099b856dca60c4c31ddb5c5e3562bac8cb18",
+    "width": 1600,
+    "height": 641
+  },
+  "fig2": {
+    "source": "figures/fig2_gnr_v3.pdf",
+    "source_sha256": "f9b2291fd139463014fff7a55175e753eac2c24223f1a4fa33ac6125862a38a8",
+    "width": 1600,
+    "height": 796
+  },
+  "fig_gnr_axis_outcome_scaling": {
+    "source": "figures/diversity/fig_gnr_axis_outcome_scaling.pdf",
+    "source_sha256": "64eef7ccb303c5d350f0af9b72783f2f6910d04b8179f83477cd43a6d70727b4",
+    "width": 1200,
+    "height": 572
+  },
+  "fig_difficulty_results_shapefilter": {
+    "source": "figures/fig_difficulty_results_shapefilter.pdf",
+    "source_sha256": "6527707d5808b2f0c9d4d09cbc488497a43a477fb9fa9aae8132a0ad1142cb72",
+    "width": 1000,
+    "height": 485
+  },
+  "fig_difficulty_results_nist": {
+    "source": "figures/fig_difficulty_results_nist.pdf",
+    "source_sha256": "44b68fa310249aa9823234cd71d3c4b151e3f59bdd7f60be2ec78b700d15f09e",
+    "width": 1000,
+    "height": 485
+  },
+  "fig_difficulty_efficiency_shapefilter": {
+    "source": "figures/fig_difficulty_efficiency_shapefilter.pdf",
+    "source_sha256": "df99d19d4d415142f284e56ab31b395c7e2c2001238c946885e08120589bdbae",
+    "width": 1000,
+    "height": 556
+  },
+  "fig_difficulty_efficiency_nist": {
+    "source": "figures/fig_difficulty_efficiency_nist.pdf",
+    "source_sha256": "db61021793814144cde7c56d72daf0411a4794c7f70956734c96db8253d7afe3",
+    "width": 1000,
+    "height": 556
+  },
+  "fig_hot3d_large_scale_evaluation": {
+    "source": "figures/appendix/fig_hot3d_large_scale_evaluation.pdf",
+    "source_sha256": "484864fb77dbc3bb1e9a8a79290e778168eef81ce75b983d5f9ae31927203d74",
+    "width": 1800,
+    "height": 574
+  }
+}

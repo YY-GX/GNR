@@ -1,10 +1,9 @@
 # Affiliation logo sources
 
 Verified October 8, 2026. These marks identify the authors' affiliations.
-All six images have transparent backgrounds. No CSS filters, tinting, opacity,
-or shadows are applied to the artwork. Entrance and hover movement apply to
-its surrounding link. The shared glass strip supplies contrast for the native
-navy, blue, and red marks.
+All six images have transparent backgrounds and their vector artwork is unchanged.
+On the page they are shown in white over the dark opening screen, via a CSS filter
+(`brightness(0) invert(1)`, opacity .9); see "Display on the page" below.
 
 | Asset | Official source | Treatment |
 | --- | --- | --- |
@@ -18,3 +17,10 @@ navy, blue, and red marks.
 The custom `*-dark.svg` variants have been removed. Original logo shapes and
 aspect ratios are preserved. “Reality Labs Research” remains a separate HTML
 caption below the Meta mark.
+
+## Display on the page (2026-10-28)
+
+The SVGs are inlined into `index.html` by `scripts/inline_logos.py`; the artwork paths are unchanged.
+- Some hosts serve `.svg` without `image/svg+xml`, and `<img>` then fails, which is why they are inlined.
+- On the dark opening screen they are shown in white with a CSS filter.
+- Every logo is shown whole, including the full UNC University Signature (horizontal lockup, unchanged file and viewBox). It is set taller than the single-line marks (48 px on desktop) so its three-line wordmark stays legible. No home-made text lockups.
