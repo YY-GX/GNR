@@ -9,9 +9,9 @@
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --paper:#ffffff; --band:#f6f6f7; --line:#e8e8ea; --line-2:#d5d6da;
   --ink:#0b0c0e; --text:#1d1f23; --body:#3c4043; --muted:#5f6368; --faint:#6b7075;
-  --accent:#2f5bea; --accent-soft:#eef2fe; --ctx:#8a9099; --ik:#c3c7cd;
-  --ok-bg:#eef2fe; --ok-ink:#1f45c4; --no-bg:#f1f1f3; --no-ink:#3c4043;
-  --link:#2f5bea; --focus:#2f5bea;
+  --accent:#a07a34; --accent-soft:#f7f0e3; --accent-ink:#86642a; --ctx:#8a9099; --ik:#c3c7cd;
+  --ok-bg:#f7f0e3; --ok-ink:#76561c; --no-bg:#f1f1f3; --no-ink:#3c4043;
+  --link:#86642a; --focus:#a07a34;
   --screen:#000;
   --r:18px; --r-s:12px;
   --wrap:1200px; --text-w:760px; --nav-h:58px;
@@ -23,9 +23,9 @@
   :root{
     --paper:#0b0c0e; --band:#121316; --line:#232529; --line-2:#33363c;
     --ink:#f5f6f7; --text:#e8eaed; --body:#c4c7cc; --muted:#9aa0a6; --faint:#7c828a;
-    --accent:#5b82f0; --accent-soft:#151c31; --ctx:#6f757e; --ik:#474b52;
-    --ok-bg:#16203d; --ok-ink:#b9caff; --no-bg:#1d1f23; --no-ink:#d0d3d8;
-    --link:#8fa9ff; --focus:#8fa9ff; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.35);
+    --accent:#d1ad68; --accent-soft:#231d14; --accent-ink:#e0c07f; --ctx:#6f757e; --ik:#474b52;
+    --ok-bg:#2a2317; --ok-ink:#ecd5a4; --no-bg:#1d1f23; --no-ink:#d0d3d8;
+    --link:#e0c07f; --focus:#e0c07f; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.35);
     color-scheme:dark;
   }
 }
@@ -55,7 +55,7 @@ html[data-site-mode="preview"] .skip{display:none}
 .nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1.5px;transform-origin:left;transform:scaleX(var(--progress,0));background:var(--ink)}
 .nav__in{max-width:var(--wrap);height:100%;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:18px}
 .nav__brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:-.01em}
-.nav__brand svg{filter:grayscale(1) contrast(1.2)}
+.nav__brand svg{flex:none}
 .nav__links{display:flex;gap:2px;margin-left:auto}
 .nav__links a{position:relative;padding:7px 12px;border-radius:999px;color:var(--muted);font-size:.85rem;font-weight:500;text-decoration:none;transition:color .2s,background .2s}
 .nav__links a:hover{color:var(--ink);background:var(--band)}
@@ -91,6 +91,7 @@ html[data-site-mode="preview"] .nav{display:none}
 .hero__title{margin:0 auto 30px;font-size:clamp(2.6rem,calc((100vw - 64px) / 14.5),4.9rem);font-size:clamp(2.6rem,6.9cqi,4.9rem);font-weight:650;letter-spacing:-.04em;line-height:1.02;color:#fff;text-wrap:balance}
 /* Narrow boxes (phones): two lines, "Generative Neural" (8.1em) / "Retargeting", sized so the first line fits. */
 @container hero (max-width:600px){.hero__title{font-size:clamp(1.9rem,11.5cqi,2.6rem)}}
+.hero__ini{color:#e8cf9b}
 .hero__sub{display:block;margin-top:18px;font-size:clamp(1.1rem,2vw,1.55rem);font-weight:400;letter-spacing:-.015em;color:rgba(245,246,247,.78)}
 .authors{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;max-width:920px;margin:0 auto 24px;font-size:1rem}
 .author{white-space:nowrap}
@@ -422,7 +423,7 @@ main{display:block}
 .tbl tr.ref td{color:var(--muted)}
 .tbl tr.ref+tr:not(.ref) td,.tbl tr.gnr--first td{border-top:1px solid var(--line-2)}
 .tbl tr.gnr td{background:var(--accent-soft)}
-.tbl tr.gnr td:first-child{color:var(--accent);font-weight:600}
+.tbl tr.gnr td:first-child{color:var(--accent-ink);font-weight:600}
 .tbl tr.best td{font-weight:700;color:var(--ink)}
 .tbl tr.grp td{padding-top:16px;color:var(--muted);font-size:.78rem;font-weight:600;text-align:left}
 .tnote{margin:12px 0 0;max-width:var(--text-w);color:var(--faint);font-size:.82rem;line-height:1.55}
@@ -625,7 +626,7 @@ html.lb-open{overflow:hidden}
 .gallery__thumb:hover,.gallery__thumb[aria-current="true"]{opacity:1;border-color:#ffffff;transform:translateY(-2px)}
 .gallery__paging{display:flex;align-items:center;gap:8px;flex:none}
 .gallery__count{font:.7rem Inter,sans-serif;color:#a8adb4;white-space:nowrap;min-width:35px;text-align:center;font-variant-numeric:tabular-nums}
-html.gallery-open{overflow:hidden;scrollbar-gutter:stable;background:#0c1323}
+html.gallery-open{overflow:hidden;scrollbar-gutter:stable;background:#14110d}
 @keyframes gallery-in{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes figure-in{from{opacity:.35;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:no-preference){.gallery[open]{animation:gallery-in .3s cubic-bezier(.2,.8,.2,1)}.gallery__image.is-entering{animation:figure-in .25s ease-out}}
