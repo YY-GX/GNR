@@ -30,7 +30,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=da53a9e3">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=dc9ff711">
 <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/site.css?v=427a3c05">
+<link rel="stylesheet" href="assets/css/site.css?v=bbad8968">
 <script defer src="assets/js/asset-versions.js?v=e6ba7f62"></script>
 <script defer src="assets/js/site.js?v=425971a5"></script>
 <script defer src="assets/js/gallery.js?v=d0c119a0"></script>
@@ -61,7 +61,7 @@
     </div>
     <!-- The two halves of the background: the precision tasks (left) and the HOT3D diversity wall (right). Wording from the paper (1_intro.tex, 4_conclusion.tex). Positions: site.js, from the render's label anchors. -->
     <div class="hero__axes" aria-hidden="true">
-      <p class="hero__axis hero__axis--l" data-axis="l"><b>Long-horizon &middot; high precision</b></p>
+      <p class="hero__axis hero__axis--l" data-axis="l"><b>Long-horizon &middot; high precision</b><span>10&ndash;30&nbsp;s &middot; 1&ndash;2&nbsp;mm</span></p>
       <p class="hero__axis hero__axis--r" data-axis="r"><b>Diversity</b><span>223k demos &middot; 3.3k geometries</span></p>
     </div>
   </div>
@@ -104,9 +104,6 @@
       <!-- arXiv 2610.12440: verify both targets before release. -->
       <a class="pill pill--primary" data-link="pdf" href="https://arxiv.org/pdf/2610.12440"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>Paper</a>
       <a class="pill" data-link="arxiv" href="https://arxiv.org/abs/2610.12440"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7M21 3l-9 9M18 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg>arXiv</a>
-      <!-- Code and Dataset: replace the span with <a class="pill" data-link="code" href="..."> when released. -->
-      <span class="pill pill--soon" data-link="code" aria-disabled="true" title="Coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>Code <small>soon</small></span>
-      <span class="pill pill--soon" data-link="dataset" aria-disabled="true" title="Coming soon"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg>Dataset <small>soon</small></span>
       <a class="pill pill--full" href="#bibtex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h10M7 16h6"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>BibTeX</a>
     </div>
     <p class="hero__soon"><span>Stay tuned.</span> More details are coming soon.</p>
@@ -123,7 +120,8 @@
 <section class="intro" id="overview" aria-label="Summary">
   <div class="wrap">
     <p class="eyebrow">TL;DR</p>
-    <p class="intro__text">GNR recasts physics-based retargeting as generative modeling. A flow-matching model, trained on a small seed set solved by MPC, samples dynamically feasible robot trajectories conditioned on human motion, and more samples bring more success.</p>
+    <p class="intro__text">Making human-to-robot dexterous retargeting scalable and efficient.</p>
+    <p class="intro__subtitle">GNR recasts <strong>physics-based retargeting as generative modeling</strong>. It learns and samples from the feasible motion manifold and achieves <strong>test-time scaling</strong>.</p>
     <dl class="stats">
       <div class="stat"><dt>Success on 1,000 OOD HOT3D demos</dt><dd><b>56.2%</b> <span>vs. 27.2% for DIAL-MPC (27.2&ndash;34.7% for sampling-based methods)</span></dd></div>
       <div class="stat"><dt>Sampling budget</dt><dd><b>8.5%</b> <span>of MPC's samples (256 vs. 3,000)</span></dd></div>
@@ -138,7 +136,7 @@
     <div class="filmsec__sticky">
       <div class="filmsec__head">
         <p class="eyebrow">Explainer video</p>
-        <h2 class="filmsec__title">GNR in under four minutes</h2>
+        <h2 class="filmsec__title">GNR</h2>
       </div>
       <div class="film__stage">
         <div class="player" data-player tabindex="-1">
@@ -204,8 +202,8 @@
   <div class="wrap">
     <div class="sec__head wrap--text">
       <p class="eyebrow">Method</p>
-      <h2 class="sec__title">Learn from solved demonstrations, then sample</h2>
-      <p class="lead">Retargeting asks for a control sequence that reproduces a human demonstration under physics. IK is fast but ignores dynamics. Sampling-based MPC finds feasible motion but solves every demonstration from scratch, so its cost grows with dataset size and task difficulty. GNR learns from solved demonstrations instead.</p>
+      <h2 class="sec__title">Learn and sample from the feasible motion manifold</h2>
+      <p class="lead">Retargeting asks for a control sequence that reproduces a human demonstration under physics. IK is fast but ignores dynamics. Sampling-based MPC finds feasible motion but solves every demonstration from scratch, so its cost grows with dataset size and task difficulty. GNR learns a feasible motion manifold from a small MPC-generated seed dataset and samples robot trajectories from that manifold. Generalization and test-time scaling make GNR a more scalable and efficient retargeter.</p>
     </div>
     <figure class="pfig pfig--wide">
       <picture><source type="image/webp" srcset="assets/paper/fig1.webp?v=ceb200f6"><img src="assets/paper/fig1.png?v=43f58cea" width="1600" height="641" loading="lazy" decoding="async" data-gallery data-title="GNR at a glance" alt="Overview figure: the GNR data engine turns egocentric and motion-capture human recordings into robot trajectories by real-to-sim, inverse kinematics, and either MPC sampling or GNR sampling, yielding 223k trajectories over 3.3k geometries; the benchmarks span large-scale diverse objects and long-horizon high-precision tasks."></picture>

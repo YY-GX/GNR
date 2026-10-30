@@ -43,4 +43,4 @@ through any static server, or publish with GitHub Pages (Settings → Pages → 
 - **Dataset:** a wall of GNR results (uniform tiles; the two precision tiles are 2×1) that autoplay muted while in view (robot clip plus the egocentric inset; paused off screen, released a viewport away; posters only with reduced motion or Save-Data; AV1 where supported), one filter along the paper's axes (Diversity · HOT3D / Difficulty · ShapeFilter, NIST), a first page plus "Show all", and a lightbox with the egocentric and robot clips in sync plus object and playback details.
 - Nothing above downloads video before it is needed. Numbers mirror the paper verbatim; see `PAPER_SYNC.md`.
 
-Placeholders before release: the Code and Dataset buttons are "soon" pills (replace each `<span class="pill pill--soon">` with a link). The arXiv links point to 2610.12440.
+The Code and Dataset buttons are omitted until release. The arXiv links point to 2610.12440.

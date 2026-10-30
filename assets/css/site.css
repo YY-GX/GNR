@@ -80,6 +80,7 @@ html[data-site-mode="preview"] .nav{display:none}
 .hero__axis::before{content:'';width:22px;height:1.5px;margin-bottom:4px;background:rgba(255,255,255,.75)}
 .hero__axis b{font-size:.76rem;font-weight:650;letter-spacing:.2em;color:#fff}
 .hero__axis span{font-size:.68rem;font-weight:500;letter-spacing:.16em;color:rgba(245,246,247,.92)}
+.hero__axis--l span{text-transform:none}
 .hero__axis--l{left:32px}
 .hero__axis--r{right:32px}
 .hero__axis.is-right{text-align:right;align-items:flex-end}
@@ -137,7 +138,9 @@ html[data-site-mode="preview"] .hero__scroll{visibility:hidden}
 /* ---------- sections ---------- */
 main{display:block}
 .intro{padding:150px 0 40px}
-.intro__text{max-width:980px;margin:0 0 64px;font-size:clamp(1.6rem,3.1vw,2.5rem);font-weight:600;line-height:1.22;letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.intro__text{max-width:980px;margin:0;font-size:clamp(1.6rem,3.1vw,2.5rem);font-weight:600;line-height:1.22;letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.intro__subtitle{max-width:900px;margin:20px 0 64px;font-size:clamp(1.05rem,1.65vw,1.3rem);font-weight:400;line-height:1.6;color:var(--body);text-wrap:pretty}
+.intro__subtitle strong{font-weight:600;color:var(--text)}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;margin:0}
 .stat{padding-top:20px;border-top:1px solid var(--line)}
 .stat dt{min-height:2.7em;margin:0 0 10px;color:var(--muted);font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
@@ -544,7 +547,7 @@ html.lb-open{overflow:hidden}
   .hero__fn{font-size:.76rem;flex-direction:column;gap:2px}
   .pill{height:40px;padding:0 15px;font-size:.86rem}
   .intro{padding-top:96px}
-  .intro__text{margin-bottom:44px}
+  .intro__subtitle{margin-bottom:44px}
   .stats{gap:20px}
   .sec{padding-top:110px}
   .sec--tint{margin-top:110px;padding:80px 0 88px}
